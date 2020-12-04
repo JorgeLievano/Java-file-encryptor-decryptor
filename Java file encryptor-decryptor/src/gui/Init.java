@@ -1,11 +1,12 @@
 package gui;
 
+import control.Coordinator;
+
 public class Init {
 
 	public static void main(String[] args) {
-		MainWindow mainWindow = new MainWindow();
-		mainWindow.setVisible(true);
-
+		Coordinator coordinator = new Coordinator();
+		coordinator.deploy();
 	}
 
 }

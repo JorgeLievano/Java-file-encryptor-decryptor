@@ -3,27 +3,32 @@ package gui;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import control.ActionController;
+
 public class ActionsPanel extends JPanel {
 
-	public final static String FILE = "FILE";
-	public final static String ENCRYPT = "ENCRYPT";
-	public final static String DECRYPT = "DECRYPT";
 	private JButton fileBtn;
 	private JButton encryptBtn;
 	private JButton decryptBtn;
+	private ActionController controller;
 
 	public ActionsPanel() {
+		fileBtn = new JButton(ActionController.FILE);
 
-		fileBtn = new JButton(FILE);
+		encryptBtn = new JButton(ActionController.ENCRYPT);
 
-		encryptBtn = new JButton(ENCRYPT);
-
-		decryptBtn = new JButton(DECRYPT);
+		decryptBtn = new JButton(ActionController.DECRYPT);
 
 		add(fileBtn);
-
 		add(encryptBtn);
 		add(decryptBtn);
+	}
+
+	public void setController(ActionController controller) {
+		this.controller = controller;
+		fileBtn.addActionListener(controller);
+		encryptBtn.addActionListener(controller);
+		decryptBtn.addActionListener(controller);
 	}
 
 }

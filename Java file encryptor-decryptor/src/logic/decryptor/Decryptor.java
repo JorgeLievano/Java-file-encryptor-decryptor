@@ -1,4 +1,4 @@
-package logic.encryptor;
+package logic.decryptor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,50 +15,52 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class Encryptor {
-
+public class Decryptor {
 	/**
-	 * Method to encrypt a file with AES in CBC mode.
+	 * Methof to decrypt a file with aes in cbc mode with the given secret key
 	 *
-	 * @param key   128 bits key
-	 * @param input input file
-	 * @param out   output encrypted file
+	 * @param key   key generated with PKDF2
+	 * @param input file input
+	 * @param out   file output
 	 * @param iv    initialization vector
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchPaddingException
-	 * @throws InvalidKeyException
-	 * @throws InvalidAlgorithmParameterException
+	 * @param off   bytes to skip
 	 * @throws IOException
 	 * @throws IllegalBlockSizeException
 	 * @throws BadPaddingException
+	 * @throws InvalidKeyException
+	 * @throws InvalidAlgorithmParameterException
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
 	 */
-	public void AESEncrypt(byte[] key, File input, File out, byte[] iv)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
-			InvalidAlgorithmParameterException, IOException, IllegalBlockSizeException, BadPaddingException {
+	public void aes_cbc_decrypt(byte[] key, File input, File out, byte[] iv, int off)
+			throws IOException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException,
+			InvalidAlgorithmParameterException, NoSuchAlgorithmException, NoSuchPaddingException {
 		// Specifications to generate the secret key
 		SecretKeySpec keySpec = new SecretKeySpec(key, "AES");
+		// iv parameter
 		IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
-		// cipher configuration wit the selected algorithm, mode, padding, iv and key
-		// specification
+		// decrypter cipher mode configuration with the selected algorithm, mode,
+		// padding, iv and key specification
 		Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-		cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivParameterSpec);
-		// open the input file stream
+		cipher.init(Cipher.DECRYPT_MODE, keySpec, ivParameterSpec);
+		//// open the input file stream
 		FileInputStream fileInputStream = new FileInputStream(input);
-
-		// define buffer block size to read the input
+		// skip heads bytes that contained hash, salt and iv
+		fileInputStream.skip(off);
+		// set reading buffer block
 		int bufferSize = 128;
 		byte[] buffer = new byte[bufferSize];
 
-		// Set file out stream to append information (it had data before as the source
-		// hash and Iv)
-		FileOutputStream fileOutputStream = new FileOutputStream(out, true);
-		// iterative reading of the input and encryption by blocks
+		// open the file output stream to write decrypted data
+		FileOutputStream fileOutputStream = new FileOutputStream(out);
+
+		// Iterative reading and decrypt by blocks
 		while ((bufferSize = Math.min(128, fileInputStream.available())) == 128) {
 			fileInputStream.read(buffer);
 			fileOutputStream.write(cipher.update(buffer));
 
 		}
-		// finish encryption and padding
+		// finish decryption and padding
 		buffer = new byte[bufferSize];
 		fileInputStream.read(buffer);
 		fileOutputStream.write(cipher.doFinal(buffer));
@@ -66,4 +68,5 @@ public class Encryptor {
 		fileInputStream.close();
 		fileOutputStream.close();
 	}
+
 }
